@@ -51,7 +51,13 @@ public class EventHandler {
 
         first.ifPresent(module -> {
             Optional<Module> moduleOptional = this.getEnabledModules().stream().findFirst();
+
             if (moduleOptional.isPresent()) {
+                if (moduleOptional.get().getName().equals(module.getName())) {
+                    module.toggle();
+                    return;
+                }
+
                 minecraft.ingameGUI.displayTitle(StringUtil.fixColors("&7[ &3Modules &7]"), null, 10, 10, 10);
                 minecraft.ingameGUI.displayTitle(null, StringUtil.fixColors("&7Module &9" + module.getName() + " &7cannot be enabled &8(&9" + moduleOptional.get().getName() + " &7is enabled&8)"), 10, 10, 10);
                 return;
