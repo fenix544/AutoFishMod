@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.7",
+  "package": "me.fenix.mixins",
+  "refmap": "mixins.autofish.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinEntityPlayerSP",
+    "MixinGuiIngame",
+    "MixinMinecraft",
+    "MixinNetworkManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

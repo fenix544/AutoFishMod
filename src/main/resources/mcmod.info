@@ -1,0 +1,16 @@
+[
+{
+  "modid": "autofish",
+  "name": "AutoFishMod",
+  "description": "Auto Fish mod",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["fenix"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
