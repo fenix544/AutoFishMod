@@ -24,6 +24,7 @@ public class PvpIqAutoFishModule extends Module {
 
     private final WaitTimer timer = new WaitTimer();
     private final WaitTimer checkRodTimer = new WaitTimer();
+
     private boolean waiting;
     private boolean verificationIn, verificationComplete;
 
@@ -66,11 +67,11 @@ public class PvpIqAutoFishModule extends Module {
 
     @PacketHandler(handle = S29PacketSoundEffect.class)
     public void onSoundEffect(S29PacketSoundEffect packet) {
-        EntityPlayerSP thePlayer = this.mc.thePlayer;
+        EntityPlayerSP player = this.mc.thePlayer;
 
-        if (thePlayer.fishEntity == null) return;
+        if (player.fishEntity == null) return;
         if (!packet.getSoundName().equals("random.splash")) return;
-        if (Math.abs(packet.getX() - thePlayer.fishEntity.posX) > 1 && Math.abs(packet.getZ() - thePlayer.fishEntity.posZ) > 1)
+        if (Math.abs(packet.getX() - player.fishEntity.posX) > 1 && Math.abs(packet.getZ() - player.fishEntity.posZ) > 1)
             return;
 
         Util.rightClick();

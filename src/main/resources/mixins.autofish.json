@@ -8,7 +8,8 @@
     "MixinEntityPlayerSP",
     "MixinGuiIngame",
     "MixinMinecraft",
-    "MixinNetworkManager"
+    "MixinNetworkManager",
+    "MixinGuiMultiplayer"
   ],
   "injectors": {
     "defaultRequire": 1

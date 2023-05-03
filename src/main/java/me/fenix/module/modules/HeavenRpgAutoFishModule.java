@@ -10,6 +10,8 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import org.lwjgl.input.Keyboard;
 
+import java.util.concurrent.TimeUnit;
+
 @ModuleInfo(name = "AutoFish - HeavenRpg", keyCode = Keyboard.KEY_M)
 public class HeavenRpgAutoFishModule extends Module {
 
@@ -46,23 +48,43 @@ public class HeavenRpgAutoFishModule extends Module {
 
     @PacketHandler(handle = S29PacketSoundEffect.class)
     public void onSoundEffect(S29PacketSoundEffect packet) {
-        EntityPlayerSP thePlayer = this.mc.thePlayer;
+        EntityPlayerSP player = this.mc.thePlayer;
 
-        if (thePlayer.fishEntity == null) return;
+        if (player.fishEntity == null) return;
         if (!packet.getSoundName().equals("random.splash")) return;
-        if (Math.abs(packet.getX() - thePlayer.fishEntity.posX) > 1 && Math.abs(packet.getZ() - thePlayer.fishEntity.posZ) > 1)
+        if (Math.abs(packet.getX() - player.fishEntity.posX) > 1 && Math.abs(packet.getZ() - player.fishEntity.posZ) > 1)
             return;
 
         this.caughtFish.setValue(this.caughtFish.getValue() + 1);
-
         Util.rightClick();
-        Util.makeRotation(
-                delayAfterCaught,
-                delayAfterRotation,
-                pitchToRotate,
-                delayDuringRotation,
-                this::reset
-        );
+
+        this.scheduler.runAsyncTask(() -> {
+            Util.sleep(this.delayAfterCaught.getValue(), TimeUnit.MILLISECONDS);
+            for (float i = 0; i < this.pitchToRotate.getValue(); i++) {
+                player.setPositionAndRotation(
+                        player.posX,
+                        player.posY,
+                        player.posZ,
+                        player.rotationYaw,
+                        player.rotationPitch + 1
+                );
+                Util.sleep(this.delayDuringRotation.getValue(), TimeUnit.MILLISECONDS);
+            }
+
+            Util.sleep(this.delayAfterRotation.getValue(), TimeUnit.MILLISECONDS);
+            for (float i = 0; i < this.pitchToRotate.getValue(); i++) {
+                player.setPositionAndRotation(
+                        player.posX,
+                        player.posY,
+                        player.posZ,
+                        player.rotationYaw,
+                        player.rotationPitch - 1
+                );
+                Util.sleep(this.delayDuringRotation.getValue(), TimeUnit.MILLISECONDS);
+            }
+
+            Util.sleep(this.delayAfterRotation.getValue(), TimeUnit.MILLISECONDS);
+        }).whenComplete((unused, throwable) -> this.reset());
     }
 
     private void reset() {

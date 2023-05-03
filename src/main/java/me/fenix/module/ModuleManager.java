@@ -5,6 +5,7 @@ import me.fenix.module.modules.HeavenRpgAutoFishModule;
 import me.fenix.module.modules.MyRpgAutoFishModule;
 import me.fenix.module.modules.PvpIqAutoFishModule;
 import me.fenix.module.settings.SettingsManager;
+import me.fenix.scheduler.Scheduler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,11 +50,12 @@ public class ModuleManager {
         module.setName(annotation.name());
         module.setEnabled(false);
         module.setKeyCode(annotation.keyCode());
+        module.setScheduler(new Scheduler(module.getName()));
 
         for (Method method : module.getClass().getMethods()) {
             if (method.isAnnotationPresent(PacketHandler.class)) {
                 PacketHandler packetHandler = method.getAnnotation(PacketHandler.class);
-                module.getMethods().put(packetHandler.handle(), method);
+                module.getPacketHandlerMethods().put(packetHandler.handle(), method);
             }
         }
 

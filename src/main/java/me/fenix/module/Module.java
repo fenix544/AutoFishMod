@@ -2,6 +2,7 @@ package me.fenix.module;
 
 import me.fenix.module.settings.Setting;
 import me.fenix.module.settings.SettingsBuilder;
+import me.fenix.scheduler.Scheduler;
 import me.fenix.util.StringUtil;
 import net.minecraft.client.Minecraft;
 
@@ -15,7 +16,9 @@ public abstract class Module {
 
     protected final SettingsBuilder settingsBuilder = new SettingsBuilder();
     protected final Minecraft mc = Minecraft.getMinecraft();
-    private final Map<Class<?>, Method> methods = new HashMap<>();
+    private final Map<Class<?>, Method> packetHandlerMethods = new HashMap<>();
+    protected Scheduler scheduler;
+
     private String name;
     private boolean enabled;
     private int keyCode;
@@ -34,10 +37,9 @@ public abstract class Module {
     protected void onEnable() {
     }
 
-
     protected void onDisable() {
+        this.scheduler.shutdownTasks();
     }
-
 
     public void onUpdate() {
     }
@@ -66,15 +68,19 @@ public abstract class Module {
         this.keyCode = keyCode;
     }
 
-    public Map<Class<?>, Method> getMethods() {
-        return methods;
+    public Map<Class<?>, Method> getPacketHandlerMethods() {
+        return packetHandlerMethods;
     }
 
     public Optional<Method> getMethod(Class<?> clazz) {
-        return Optional.ofNullable(methods.get(clazz));
+        return Optional.ofNullable(packetHandlerMethods.get(clazz));
     }
 
     public List<Setting<?>> getSettings() {
         return settingsBuilder.getSettings();
+    }
+
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
     }
 }

@@ -11,6 +11,8 @@ import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import org.lwjgl.input.Keyboard;
 
+import java.util.concurrent.TimeUnit;
+
 @ModuleInfo(name = "AutoFish - MyRpg", keyCode = Keyboard.KEY_H)
 public class MyRpgAutoFishModule extends Module {
 
@@ -24,6 +26,7 @@ public class MyRpgAutoFishModule extends Module {
             .createSetting(new Setting<>(Integer.class, 0, "Caught fish"));
 
     private final WaitTimer timer = new WaitTimer();
+
     private boolean waiting;
     private RotationType rotationType = RotationType.UP;
 
@@ -44,24 +47,34 @@ public class MyRpgAutoFishModule extends Module {
 
     @PacketHandler(handle = S29PacketSoundEffect.class)
     public void onSoundEffect(S29PacketSoundEffect packet) {
-        EntityPlayerSP thePlayer = this.mc.thePlayer;
+        EntityPlayerSP player = this.mc.thePlayer;
 
-        if (thePlayer.fishEntity == null) return;
+        if (player.fishEntity == null) return;
         if (!packet.getSoundName().equals("random.splash")) return;
-        if (Math.abs(packet.getX() - thePlayer.fishEntity.posX) > 1 && Math.abs(packet.getZ() - thePlayer.fishEntity.posZ) > 1)
+        if (Math.abs(packet.getX() - player.fishEntity.posX) > 1 && Math.abs(packet.getZ() - player.fishEntity.posZ) > 1)
             return;
 
         this.caughtFish.setValue(this.caughtFish.getValue() + 1);
-
         Util.rightClick();
-        int lastSlot = thePlayer.inventory.currentItem;
-        int slot = thePlayer.inventory.currentItem == 8 ? 0 : thePlayer.inventory.currentItem + 1;
-        thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(slot));
 
-        Util.singleRotation(this.delayAfterCaught, this.delayDuringRotation, this.rotationType, () -> {
-            thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastSlot));
-            this.reset();
-        });
+        int lastSlot = player.inventory.currentItem;
+        int slot = lastSlot == 8 ? 0 : lastSlot + 1;
+        player.sendQueue.addToSendQueue(new C09PacketHeldItemChange(slot));
+        player.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastSlot));
+
+        this.scheduler.runAsyncTask(() -> {
+            Util.sleep(this.delayAfterCaught.getValue(), TimeUnit.MILLISECONDS);
+            for (int i = 1; i < 9; i++) {
+                player.setPositionAndRotation(
+                        player.posX,
+                        player.posY,
+                        player.posZ,
+                        player.rotationYaw,
+                        this.rotationType.calculate(player.rotationPitch, (float) (i * 0.25))
+                );
+                Util.sleep(this.delayDuringRotation.getValue(), TimeUnit.MILLISECONDS);
+            }
+        }).whenComplete((aVoid, throwable) -> this.reset());
     }
 
     private void reset() {
@@ -70,7 +83,7 @@ public class MyRpgAutoFishModule extends Module {
         this.timer.reset();
     }
 
-    public enum RotationType {
+    private enum RotationType {
         UP, DOWN;
 
         public float calculate(float playerPitch, float value) {
