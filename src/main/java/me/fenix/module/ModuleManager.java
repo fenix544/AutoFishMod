@@ -1,6 +1,7 @@
 package me.fenix.module;
 
 import me.fenix.event.EventHandler;
+import me.fenix.module.modules.FineRpgAutoFishModule;
 import me.fenix.module.modules.HeavenRpgAutoFishModule;
 import me.fenix.module.modules.MyRpgAutoFishModule;
 import me.fenix.module.modules.PvpIqAutoFishModule;
@@ -28,6 +29,7 @@ public class ModuleManager {
         register(new MyRpgAutoFishModule());
         register(new HeavenRpgAutoFishModule());
         register(new PvpIqAutoFishModule());
+        register(new FineRpgAutoFishModule());
     }
 
     public void onEnable() {
